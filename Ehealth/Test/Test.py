@@ -6,10 +6,18 @@ Created on 25 de abr de 2018
 import speech_recognition as sr
 from gtts import gTTS
 import os
+import pyttsx
 
 r = sr.Recognizer()
 m = sr.Microphone()
 
+
+
+
+def tell_this_only_english(word_to_tell):
+    engine = pyttsx.init()
+    engine.say(word_to_tell)
+    engine.runAndWait()
 
 
 
@@ -19,7 +27,7 @@ def tell_this_in(tell,lang):
     os.system("mpg321 /home/lucas/workspace/E-health/Test/1.mp3")
 
 
-
+tell_this_only_english("hello.")
 try:
     
     #strn = "Silencio por favor. Estou Configurando threshold. Tudo pronto, o que voce deseja mestre?"
@@ -39,7 +47,6 @@ try:
         tts = gTTS(text=value, lang='pt')
         tts.save("1.mp3")
         os.system("mpg321 /home/lucas/workspace/E-health/Test/1.mp3")
-
         
     except sr.UnknownValueError:
         print("Oops! Didn't catch that")
