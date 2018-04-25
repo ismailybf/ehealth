@@ -14,10 +14,6 @@ m = sr.Microphone()
 
 
 
-def tell_this_only_english(word_to_tell):
-    engine = pyttsx.init()
-    engine.say(word_to_tell)
-    engine.runAndWait()
 
 
 
@@ -27,7 +23,12 @@ def tell_this_in(tell,lang):
     os.system("mpg321 /home/lucas/workspace/E-health/Test/1.mp3")
 
 
-tell_this_only_english("hello.")
+def tell_this_only_english(word_to_tell):
+    engine = pyttsx.init()
+    engine.say(word_to_tell)
+    engine.runAndWait()
+
+
 try:
     
     #strn = "Silencio por favor. Estou Configurando threshold. Tudo pronto, o que voce deseja mestre?"
