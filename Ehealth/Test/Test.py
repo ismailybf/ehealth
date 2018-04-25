@@ -43,12 +43,9 @@ try:
     try:
         # recognize speech using Google Speech Recognition
         value = r.recognize_google(audio)
-        value = "Entendi... voce disse "+value 
+        value = "I got it, you said "+value 
         print (value)
-        tts = gTTS(text=value, lang='pt')
-        tts.save("1.mp3")
-        os.system("mpg321 /home/lucas/workspace/E-health/Test/1.mp3")
-        
+        tell_this_only_english(value)
     except sr.UnknownValueError:
         print("Oops! Didn't catch that")
     except sr.RequestError as e:
