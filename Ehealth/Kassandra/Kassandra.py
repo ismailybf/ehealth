@@ -16,6 +16,7 @@ import webbrowser
 import requests
 from bs4 import BeautifulSoup
 import wikipedia as wiki
+from nose import result
 wiki.set_lang("pt")
 
 
@@ -41,7 +42,7 @@ def msg_dont_get_it():
     
 
 
-def msg_navegador():
+def msg_browser():
     print "Deseja informações mais detalhadas no site que encontrei? Eu posso colocar no seu navegador."
     print "Ah, você pode ler com calma e retornar quando quiser, que eu estarei esperando. Quando voltar basta me chamar"
         
@@ -59,8 +60,14 @@ def conf():
     print "Tudo pronto. Threshod configurado para 24000 Hz e 32 kbits/s"
     os.system("mpg321 "+dir_files+"conf.mp3")
 
-def get_intro():
+def get_intro_meningite():
     mens= "Eu sou Cassandra e vou lhe ajudar no diagnóstico da meningite. Você quer mais informações sobre a doença?"
+    print mens
+    os.system("mpg321 "+dir_files+"intro.mp3")
+
+
+def get_intro():
+    mens= "Olá, eu sou Cassandra e estou aqui para lhe ajudar."
     print mens
     os.system("mpg321 "+dir_files+"intro.mp3")
 
@@ -97,28 +104,35 @@ def tell_this_file(tell,file_use,lang="pt"):
     os.system("mpg321 "+dir_files+""+file_use+".mp3")
 
 
-
-
-
-
 def get_wikipedia_search(search):
-    
+    tell_this("Você deseja a busca: "+search)
+    print "Você deseja a busca: "+search
     try:
-        results = wiki.search(search,5)
-        print "Eu encontrei  5 artigos no wikipedia:"
-        for res in results:
-            page = wiki.page(res)
-            print page.title
-            print page.url
-        
-        result_content=wiki.summary(results[0], sentences=3)
+        results = wiki.search(search,3)
+        if not results or results==None or results ==[]:
+            tell_this("Desculpe, não consegui encontrar sua busca. Tente novamente com outras palavras.")
+            return False
+            
+        query = results[0]
+        url = wiki.page(query).url
+        result_content=wiki.summary(query, sentences=3)
+        print "lendo informações em:", 
+        print url
+        print result_content
+        tell_this("Busca concluída, um momento...")
         result_content = unicodedata.normalize('NFKD',result_content).encode('utf-8','ignore')
-        return result_content
+        tell_this(result_content)
+        msg_browser()
+        res = get_yes_or_no_question()
+        if res:
+            webbrowser.open(url)    
+            return True
+        return False
     except:
-        return "Desculpe, sua busca não tem página no Wikipedia Brasil"
-    
+        tell_this("Desculpe, não consegui encontrar sua busca. Tente novamente com outras palavras.")
+        return False
 
-def get_search_google(search,num_search=3):
+def get_google_search(search,num_search=3):
     
     tell_this("Você deseja a busca: "+search)
     try:
@@ -126,13 +140,12 @@ def get_search_google(search,num_search=3):
     except:
         print "Desculpe, não consegui encontrar sua busca. Tente novamente com outras palavras."
         tell_this("Desculpe, não consegui encontrar sua busca. Tente novamente com outras palavras.")
-        return "",""        
+        return False        
 
     if not response:
         tell_this("Desculpe, não consegui encontrar sua busca. Tente novamente com outras palavras.")
-        return "Desculpe, não consegui encontrar sua busca. Tente novamente com outras palavras.",""
-        
-        
+        print ("Desculpe, não consegui encontrar sua busca. Tente novamente com outras palavras.")
+        return False
     results = response.results
     meta_max = ""
     url_max =""
@@ -154,16 +167,25 @@ def get_search_google(search,num_search=3):
         print meta_max
         meta_max = unicodedata.normalize('NFKD',meta_max).encode('utf-8','ignore')
         tell_this(meta_max)
-        msg_navegador()
+        msg_browser()
         res = get_yes_or_no_question()
         if res:
-            webbrowser.open(url)
-        return meta_max, url_max
+            webbrowser.open(url)    
+            return True
+        return False
     else:
         tell_this("Desculpe, não consegui encontrar sua busca. Tente novamente com outras palavras.")
-        return "Desculpe, sua busca não tem página no Wikipedia Brasil",""
+        print ("Desculpe, não consegui encontrar sua busca. Tente novamente com outras palavras.")
+        return False
 
 
+def get_search(search):
+    
+    search = unicodedata.normalize('NFKD',search).encode('utf-8','ignore')
+    if "defina" in search or "o que é" in search or "quem é" in search:
+        return get_wikipedia_search(search)
+    return get_google_search(search)
+    
 def get_open_question():
     r = sr.Recognizer()
     m = sr.Microphone()
@@ -190,7 +212,27 @@ def get_open_question():
             except KeyboardInterrupt:
                 pass
 
-
+def waiting_ask():
+    r = sr.Recognizer()
+    m = sr.Microphone()
+    with m as source: 
+        r.adjust_for_ambient_noise(source)
+        print "Esperando..."              
+        while True:
+            try:
+                audio = r.listen(source)
+                try:
+                    value = r.recognize_google(audio,language='pt-BR')
+                    print "Resposta = "+value
+                    if "Cassandra" in value or "Kassandra" in value:
+                        tell_this("Olá, ainda estou aqui.")
+                        return True
+                except sr.UnknownValueError:
+                    pass
+                except sr.RequestError:
+                    pass
+            except KeyboardInterrupt:
+                pass
 
 def get_yes_or_no_question():
     r = sr.Recognizer()
@@ -234,31 +276,32 @@ def get_yes_or_no_question():
             except KeyboardInterrupt:
                 pass
 
-
-
-
-
-
-
-
-
-
-
-
-
 def tell_this_only_english(word_to_tell):
     engine = pyttsx.init()
     engine.say(word_to_tell)
     engine.runAndWait()
 
-
-
 def get_voice_from_this(question):
     os.system("mpg321 "+dir_files+question+".mp3")
-    
-    
 
 
+
+def short_general_menu():    
+    tell= "Diga o que você deseja saber." 
+    print tell 
+    tell_this_file(tell, "short_general_menu")
+    get_voice_from_this("short_general_menu")
+    
+
+def general_menu():    
+    tell= "Diga o que você deseja saber. Eu sei informações sobre a meningite, mas também consigo efetuar buscas no google e tenho acesso a base de toda a wikipédia" 
+    tell_2= "Você pode dizer, por exemplo, 'meningite', e eu posso lhe ajudar no diagnóstico. Ou você pode fazer alguma pergunta, como por exemplo, o que é um antibiótico?"  
+    print tell
+    print tell_2
+    get_voice_from_this("general_menu_1")
+    get_voice_from_this("general_menu_2")
+    
+    
 def menu():    
     print "Diga o que você deseja saber sobre a doença. Eu sei informações como, por exemplo:" 
     print " Como a meningite se propaga?"
@@ -278,11 +321,7 @@ def menu():
 def menu_2():
     print "Diga o que você deseja saber sobre a doença"  
     get_voice_from_this("menu_resumido")
-  
-
-
-
-    
+      
 def get_meningite(): 
     msg_conf()
     conf()

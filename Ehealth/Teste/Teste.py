@@ -18,11 +18,11 @@ import webbrowser
 
 
 
-query = 'quem é o seya'
+query = 'Quem é o pintor Rafael'
 #ka.get_wikipedia_search(query)
 
-res,url = ka.get_search_google(query, 3)
-print res, url
+ka.get_wikipedia_search(query)
+ka.waiting_ask()
 
 
 
