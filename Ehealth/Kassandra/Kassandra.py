@@ -180,9 +180,12 @@ def get_google_search(search,num_search=3):
 
 
 def get_search(search):
+   
+    search = unicodedata.normalize('NFKD',search).encode('utf-8','ignore').lower()
     
-    search = unicodedata.normalize('NFKD',search).encode('utf-8','ignore')
-    if "defina" in search or "o que é" in search or "quem é" in search:
+    
+    
+    if ("o que e" in search) or ("quem e" in search):
         return get_wikipedia_search(search)
     return get_google_search(search)
     
@@ -215,12 +218,20 @@ def get_open_question():
 def waiting_ask():
     r = sr.Recognizer()
     m = sr.Microphone()
+    cont=1
     with m as source: 
-        r.adjust_for_ambient_noise(source)
-        print "Esperando..."              
+        r.adjust_for_ambient_noise(source)              
         while True:
             try:
-                audio = r.listen(source)
+                print "Esperando..."            
+                if cont>=1:
+                    opt = raw_input("Esperei muito...Desse modo, meu microfone perdeu qualidade, me chame por aqui.")
+                    if "Cassandra" in opt:
+                        tell_this("Olá, ainda estou aqui.")
+                        return True         
+                audio = r.listen(source,1)
+                cont +=1
+                
                 try:
                     value = r.recognize_google(audio,language='pt-BR')
                     print "Resposta = "+value
@@ -289,7 +300,6 @@ def get_voice_from_this(question):
 def short_general_menu():    
     tell= "Diga o que você deseja saber." 
     print tell 
-    tell_this_file(tell, "short_general_menu")
     get_voice_from_this("short_general_menu")
     
 
@@ -480,6 +490,7 @@ def get_meningite():
                 else:
                     result = get_search(op)
                     if result: waiting_ask()
+                    get_voice_from_this("continuar_ou_sair")
                     res = get_yes_or_no_question()
                     if res:
                         menu_resumido = True 
