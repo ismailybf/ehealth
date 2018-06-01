@@ -13,13 +13,14 @@ import Kassandra.Kassandra as ka
 
 if __name__ == '__main__':
     cont = 1
-    #ka.msg_conf()
-    #ka.conf()
-    #ka.get_intro() 
+    ka.msg_conf()
+    ka.conf()
+    ka.get_intro() 
     while True:
         if cont<2:ka.general_menu()
         else: ka.short_general_menu()
         opt = ka.get_open_question()
+        opt = "meningite"
         if "sair" in opt: break
         elif "meningite" in opt:
             ka.get_meningite()
@@ -32,6 +33,9 @@ if __name__ == '__main__':
                 ka.waiting_ask()
                 cont+=1
     
-    
+    mens = ("Obrigado e até mais.")
+    print ("Obrigado e até mais.")
+    ka.tell_this_file(mens, "tchau",)    
+        
     
     

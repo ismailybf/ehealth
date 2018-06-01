@@ -61,10 +61,10 @@ def conf():
     os.system("mpg321 "+dir_files+"conf.mp3")
 
 def get_intro_meningite():
-    mens= "Eu sou Cassandra e vou lhe ajudar no diagnóstico da meningite. Você quer mais informações sobre a doença?"
+    mens= "Você disse 'meningite', e vou lhe ajudar no diagnóstico. Mas antes, você quer mais informações sobre a doença?"
     print mens
-    os.system("mpg321 "+dir_files+"intro.mp3")
-
+    get_voice_from_this("intro_meningite")
+   
 
 def get_intro():
     mens= "Olá, eu sou Cassandra e estou aqui para lhe ajudar."
@@ -323,9 +323,7 @@ def menu_2():
     get_voice_from_this("menu_resumido")
       
 def get_meningite(): 
-    msg_conf()
-    conf()
-    get_intro()
+    get_intro_meningite()
     intro = get_yes_or_no_question()
     if intro == True: get_info_meningite()  
     print ("Vou fazer algumas perguntas sobre sua condição geral baseado num artigo \n"+
@@ -480,8 +478,8 @@ def get_meningite():
                     break
                     
                 else:
-                    question = "Nao entendi....Gostaria de tentar novamente?"
-                    tell_this_file(question, "tentar_novamente")
+                    result = get_search(op)
+                    if result: waiting_ask()
                     res = get_yes_or_no_question()
                     if res:
                         menu_resumido = True 
