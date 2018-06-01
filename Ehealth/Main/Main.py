@@ -20,7 +20,6 @@ if __name__ == '__main__':
         if cont<2:ka.general_menu()
         else: ka.short_general_menu()
         opt = ka.get_open_question()
-        opt = "meningite"
         if "sair" in opt: break
         elif "meningite" in opt:
             ka.get_meningite()
