@@ -17,13 +17,14 @@ import requests
 from bs4 import BeautifulSoup
 import wikipedia as wiki
 from nose import result
+from PIL import Image
 wiki.set_lang("pt")
+import time
 
 
 
 
-
-dir_files="../Files/"
+dir_files="Files/"
 
 
 
@@ -37,8 +38,9 @@ def get_file_dir():
     print dir_files
 
 def msg_dont_get_it():
-    
     os.system("mpg321 "+dir_files+"nao_entendi.mp3")
+    time.sleep(3)
+
     
 
 
@@ -208,10 +210,12 @@ def get_open_question():
                     if cont<3:
                         print("Desculpe, não entendi")
                         msg_dont_get_it()
+
                 except sr.RequestError:
                     if cont<3:
                         print("Desculpe, não entendi")
                         msg_dont_get_it()
+
             except KeyboardInterrupt:
                 pass
 
@@ -275,15 +279,19 @@ def get_yes_or_no_question():
                         return True
                     elif "n" in value: 
                         return False
-                    else: msg_dont_get_it()
+                    else:
+                        msg_dont_get_it()
+
                 except sr.UnknownValueError:
                     if cont<3:
                         print("Desculpe, não entendi")
                         msg_dont_get_it()
+
                 except sr.RequestError:
                     if cont<3:
                         print("Desculpe, não entendi")
                         msg_dont_get_it()
+
             except KeyboardInterrupt:
                 pass
 
@@ -304,12 +312,16 @@ def short_general_menu():
     
 
 def general_menu():    
-    tell= "Diga o que você deseja saber. Eu sei informações sobre a meningite, mas também consigo efetuar buscas no google e tenho acesso a base de toda a wikipédia" 
-    tell_2= "Você pode dizer, por exemplo, 'meningite', e eu posso lhe ajudar no diagnóstico. Ou você pode fazer alguma pergunta, como por exemplo, o que é um antibiótico?"  
+    tell= "Diga o que você deseja saber. Eu sei informações sobre a meningite, mas também consigo efetuar buscas no google e a wikipédia"
+    tell_2= "Você pode dizer, por exemplo, 'meningite', e eu posso lhe ajudar no diagnóstico. Ou você pode fazer alguma pergunta, como por exemplo, o que é um antibiótico?"
+    tell_3 = ("Também posso simular um caso real para testar seus conhecimentos")
     print tell
     print tell_2
+    print tell_3
+    # tell_this_file(tell_3, "general_menu_3")
     get_voice_from_this("general_menu_1")
     get_voice_from_this("general_menu_2")
+    get_voice_from_this("general_menu_3")
     
     
 def menu():    
@@ -512,5 +524,180 @@ def get_meningite():
         get_voice_from_this("final_no_2")
         get_voice_from_this("final_no_3")
         #webbrowser.open_new("https://www.google.com")
-        
-        
+
+
+def resp_diagnostico():
+    print "Primeiro irei lhe fazer algumas perguntas antes de perguntar o diagnóstico."
+    get_voice_from_this("diag_intro")
+    resp_correct1 = set(["lesão púrpura", "taquicardia","hipotensão", "dor no pescoço", "pt e ppt prolongado",
+                        "creatina elevada", "cálcio baixo", "mangnésio baixo", "fósforo baixo"])
+    resp_correct2 = set(["meningite bactériana", "meningite viral", "encefalite", "tromboflebite infecciosa",
+                         "abcesso cerebral", "empiema subdural"])
+
+
+    get_voice_from_this("diag_q1")
+    while True:
+        print "Quais foram os sintomas principais apresentados pelo paciente?"
+        resp = get_open_question()
+        resp_set = set(resp.split())
+        if len(resp_set & resp_correct1) > 1 & len(resp_set - resp_correct1) == 0:
+            print "Você acertou!"
+            t = "Você acertou!"
+            tell_this(t)
+            tell_this_file(resp)
+            dif = list(resp_correct1 - resp_set)
+            dif_s = ", ".join(dif)
+            s = "Também são respostas: "
+            s = s+dif_s
+            tell_this(s)
+            break
+        elif len(resp_set & resp_correct1) > 1:
+            m = "Tente fornecer mais de um sintoma"
+            print m
+            tell_this(m)
+        elif len(resp_set - resp_correct1) == 0:
+            dif = list(resp_set - resp_correct1)
+            dif_s = ", ".join(dif)
+            s ="O seguintes sintomas na sua resposta não são corretos: "
+            s = s + dif_s
+            print s
+            tell_this(s)
+        else:
+            print("Desculpe, não entendi")
+            msg_dont_get_it()
+            time.sleep(1.0)
+
+    get_voice_from_this("diag_q2")
+    while True:
+        print "Quais são os possíveis diagnósticos para esse caso?"
+        resp = get_open_question()
+        resp_set = set(resp.split())
+        if len(resp_set & resp_correct2) > 1 & len(resp_set - resp_correct2) == 0:
+            print "Você acertou!"
+            t = "Você acertou!"
+            tell_this(t)
+            tell_this_file(resp)
+            dif = list(resp_correct2 - resp_set)
+            dif_s = ", ".join(dif)
+            s = "Também são respostas: "
+            s = s + dif_s
+            tell_this(s)
+            break
+        elif len(resp_set & resp_correct2) > 1:
+            m = "Tente fornecer mais de um sintoma"
+            tell_this(m)
+        elif len(resp_set - resp_correct2) == 0:
+            dif = list(resp_set - resp_correct2)
+            dif_s = ", ".join(dif)
+            s = "O seguintes diagnósticos na sua resposta não são corretos: "
+            s = s + dif_s
+            tell_this(s)
+        else:
+            print("Desculpe, não entendi")
+            msg_dont_get_it()
+            time.sleep(1.0)
+
+
+    get_voice_from_this("diag_q3")
+    while True:
+        print "Qual é o diagnóstico mais provável?"
+        resp = get_open_question()
+        if "sair" in resp:
+            break
+        elif "meningite bactériana" in resp:
+            m = "Você acertou! Parabéns!"
+            print m
+            tell_this(m)
+        else:
+            m = "Você não acertou tente novamente ou diga sair para desistir"
+            print m
+            tell_this(m)
+
+
+def resp_hist_doenca():
+    print "O paciente reportou que teve dor de garganta na semana passada. Além disso, um dia antes de vir ao hospital," \
+          " o paciente teve vomito e náuse. No dia que veio ao hospital o paciente começou a sentir fadiga, dor de cabeça," \
+          "dor no pescoço e fotofobia."
+    get_voice_from_this("resp_hp")
+
+def resp_hist_medico():
+    print "O paciente não tem histórico de dor abnominal, mordida de carrapato, doença sexualmente transmissível ou " \
+          "viagem recente. O paciente também recebeu vacina contra meningite seis meses antes de entrar no hospital."
+    get_voice_from_this("resp_hm")
+
+def resp_hist_familiar():
+    print "Histórico não disponível"
+    get_voice_from_this("resp_hf")
+
+def resp_exam_fisico():
+    print "Sinais vitais. temperatura: 36,8°C, batimento cardíaco: 114 batidas por minuto, ritmo respiratório: 24 " \
+          "por minuto. Imagem das lesões corporais aparecerão ao lado. Você pode fechar a imagem quando quiser."
+    get_voice_from_this("resp_ef")
+    img = Image.open(dir_files + "exame1.png")
+    img.show()
+
+def resp_exame_lab():
+    print "A imagem do exame aparecerá ao lado. Você pode fechar a imagem quando quiser"
+    get_voice_from_this("resp_lab")
+    img = Image.open(dir_files + "exame_lab.png")
+    img.show()
+
+def resp_exame_extra():
+    print "Um ecocardiograma revelou um discreto aumento do ventrículo esquerdo com função diminuída, fração de ejeção " \
+          "estimada em 30% sendo o normal acima de 60%. UM raio X do peito demonstra um edema pulmonar."
+    get_voice_from_this("resp_extra")
+
+def get_caso_real():
+    print "Início do caso. Uma estudante universitária de dezoito anos chega ao seu consultório, sua principal queixa " \
+          "é dor de cabeça e erupção cutânea"
+    get_voice_from_this("paciente")
+    print "Fale qual das possíveis informações você deseja para fazer um diagnóstico:"
+    get_voice_from_this("csm_intro")
+    print "1 - Histórico de doenças presentes atualmente"
+    get_voice_from_this("csm_hp")
+    print "2 - Histórico médico"
+    get_voice_from_this("csm_hm")
+    print "3 - Histórico familiar"
+    get_voice_from_this("csm_hf")
+    print "4 - Exame físico"
+    get_voice_from_this("csm_ef")
+    print "5 - Exame laboratorial"
+    get_voice_from_this("csm_lab")
+    print "6 - Exame extra"
+    get_voice_from_this("csm_extra")
+    get_voice_from_this("get_pronto")
+    while True:
+        resp = get_open_question()
+        print "Fale qual das possíveis informações você deseja para fazer um diagnóstico:"
+        print "1 - Histórico de doenças presentes atualmente"
+        print "2 - Histórico médico"
+        print "3 - Histórico familiar"
+        print "4 - Exame físico"
+        print "5 - Exame laboratorial"
+        print "6 - Exame extra"
+        if "sair" in resp:
+            break
+        elif u"histórico de doenças" in resp:
+            resp_hist_doenca()
+            get_voice_from_this("get_pronto")
+        elif u"histórico médico" in resp:
+            resp_hist_medico()
+            get_voice_from_this("get_pronto")
+        elif u"histórico familiar" in resp:
+            resp_hist_familiar()
+            get_voice_from_this("get_pronto")
+        elif u"exame físico" in resp:
+            resp_exam_fisico()
+            get_voice_from_this("get_pronto")
+        elif u"exame laboratorial" in resp:
+            resp_exame_lab()
+            get_voice_from_this("get_pronto")
+        elif u"exame extra" in resp:
+            resp_exame_extra()
+            get_voice_from_this("get_pronto")
+        elif any(word in resp for word in [u"pronto", u"diagnóstico"]):
+            resp_diagnostico()
+        else:
+            print("Desculpe, não entendi")
+            msg_dont_get_it()
+            time.sleep(1.0)
